@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Installing 'article' 1.0"
 # Variables
 REPO_URL="https://github.com/aurghya-0/read-it-later"
 INSTALL_DIR="$HOME/.article"
