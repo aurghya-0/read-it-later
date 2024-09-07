@@ -1,6 +1,16 @@
 from peewee import *
+from typing import Optional
+from pathlib import Path
+import os
 
-db = SqliteDatabase('storage.db', pragmas={
+
+home = str(Path.home())
+Path(f"{home}/.config/article").mkdir(parents=True, exist_ok=True)
+
+if not os.path.exists(f"{home}/.config/article/storage.db"):
+    open(f"{home}/.config/article/storage.db", "w").close()
+
+db = SqliteDatabase(f"{home}/.config/article/storage.db", pragmas={
     'journal_mode': 'wal',
     'cache_size': -1024 * 64})
 
@@ -41,5 +51,3 @@ def get_all_articles() -> list[Article]:
     return articles
 
 initialize_db()
-
-

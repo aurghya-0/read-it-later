@@ -5,11 +5,23 @@ from openai import OpenAI
 from rich import print as rprint
 from prompt_toolkit import prompt
 from db import save_article, get_all_articles
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 
-load_dotenv()
+home = str(Path.home())
+Path(f"{home}/.config/article").mkdir(parents=True, exist_ok=True)
+
+# check if a file exists
+# if not, create it
+if not os.path.exists(f"{home}/.config/article/.env"):
+    with open(f"{home}/.config/article/.env", "w") as f:
+        api_key = prompt("Enter your OpenAI API Key: ")
+        f.write(f'OPENAI_API_KEY="{api_key}"\n')
+
+load_dotenv(f"{home}/.config/article/.env")
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -24,27 +36,27 @@ class GetArticle(BaseModel):
 def save_article_as_markdown(article,url):
     # Base directory where markdown files will be saved
     base_directory = "/Users/aurghyadip/articles"
-    
+
     # Create a subdirectory for the classification
     classification_directory = os.path.join(base_directory, article.classification)
 
     final_directory = os.path.join(classification_directory, article.publish_date)
-    
+
     # Create the classification directory if it doesn't exist
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
-    
+
     # Create a valid filename from the title (remove or replace invalid characters)
     filename = f"{article.title.replace('/', '_')}.md"
-    
+
     # Full path where the markdown file will be saved
     filepath = os.path.join(final_directory, filename)
-    
+
     # Prepare the markdown content
     markdown_content = f"{article.article_text}\n\n\n" \
                        "---\n" \
                        f"Original Article Link - [Original Article]({url})\n"
-    
+
     # Save the content into a markdown file
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(markdown_content)
@@ -68,7 +80,7 @@ def get_summary(content: str):
     completions = client.beta.chat.completions.parse(
         model = "gpt-4o-mini-2024-07-18",
         messages=[
-            {"role": "system", "content": "You are an article extractor who extracts article from scraped websites. Extract the article with title, author, publish date (in ISO 8601 format) and extract the text from the article and convert it into plaintext while removing all the advertisements and extra texts inside the article. Also classify the article into a subcategory."},
+            {"role": "system", "content": "You are an article extractor who extracts article from scraped websites. Extract the article with title, author, publish date (in ISO 8601 format) and extract the text from the article and convert it into HTML while removing all the advertisements and extra texts inside the article, also do not keep the title, author and publish date inside the article text. Also classify the article into a subcategory."},
             {"role": "user", "content": content}
         ],
         response_format=GetArticle,
@@ -89,15 +101,13 @@ if __name__ == '__main__':
         article_text=summary.article_text,
         article_link=url
     )
-    result = get_all_articles()
-    categories = [r.classification for r in result]
-    rprint(categories)
+    rprint(f"Article {summary.title} saved to database")
+    # result = get_all_articles()
+    # categories = [r.classification for r in result]
+    # rprint(categories)
     # save_article_as_markdown(summary, url)
     # rprint(f"Title = {summary.title}")
     # rprint(f"Author = {summary.author}")
     # rprint(f"Date = {summary.publish_date}")
     # rprint(f"Tag = {summary.classification}")
     # rprint(f"{summary.article_text}")
-   
-
-    

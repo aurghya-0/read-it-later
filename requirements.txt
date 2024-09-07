@@ -3,3 +3,5 @@ pydantic
 python-dotenv
 rich
 prompt-toolkit
+requests
+pyinstaller
