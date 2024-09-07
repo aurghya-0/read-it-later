@@ -33,36 +33,6 @@ class GetArticle(BaseModel):
     publish_date: str
     article_text: str
 
-def save_article_as_markdown(article,url):
-    # Base directory where markdown files will be saved
-    base_directory = "/Users/aurghyadip/articles"
-
-    # Create a subdirectory for the classification
-    classification_directory = os.path.join(base_directory, article.classification)
-
-    final_directory = os.path.join(classification_directory, article.publish_date)
-
-    # Create the classification directory if it doesn't exist
-    if not os.path.exists(final_directory):
-        os.makedirs(final_directory)
-
-    # Create a valid filename from the title (remove or replace invalid characters)
-    filename = f"{article.title.replace('/', '_')}.md"
-
-    # Full path where the markdown file will be saved
-    filepath = os.path.join(final_directory, filename)
-
-    # Prepare the markdown content
-    markdown_content = f"{article.article_text}\n\n\n" \
-                       "---\n" \
-                       f"Original Article Link - [Original Article]({url})\n"
-
-    # Save the content into a markdown file
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(markdown_content)
-
-    print(f"Markdown file '{filename}' created successfully in '{final_directory}'.")
-
 def fetch_content(url):
     headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -101,13 +71,4 @@ if __name__ == '__main__':
         article_text=summary.article_text,
         article_link=url
     )
-    rprint(f"Article {summary.title} saved to database")
-    # result = get_all_articles()
-    # categories = [r.classification for r in result]
-    # rprint(categories)
-    # save_article_as_markdown(summary, url)
-    # rprint(f"Title = {summary.title}")
-    # rprint(f"Author = {summary.author}")
-    # rprint(f"Date = {summary.publish_date}")
-    # rprint(f"Tag = {summary.classification}")
-    # rprint(f"{summary.article_text}")
+    rprint(f"Article from {summary.author} saved to database")
