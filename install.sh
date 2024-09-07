@@ -19,8 +19,10 @@ echo "Cloning repository into $INSTALL_DIR..."
 if [ -d "$INSTALL_DIR" ]; then
     echo "$INSTALL_DIR already exists, pulling latest changes..."
     git -C "$INSTALL_DIR" pull
+    echo "Updating submodules..."
+    git -C "$INSTALL_DIR" submodule update --init --recursive
 else
-    git clone "$REPO_URL" "$INSTALL_DIR"
+    git clone --recurse-submodules "$REPO_URL" "$INSTALL_DIR"
 fi
 
 # Make the 'article' script executable
